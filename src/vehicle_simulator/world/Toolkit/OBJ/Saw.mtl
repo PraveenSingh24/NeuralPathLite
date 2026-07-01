@@ -1,0 +1,16 @@
+# Saw materials
+newmtl orange
+Ka 0.85 0.6 0.0
+Kd 0.95 0.68 0.05
+Ks 0.1 0.1 0.1
+Ns 20.0
+d 1.0
+illum 2
+
+newmtl silver
+Ka 0.55 0.55 0.55
+Kd 0.75 0.75 0.72
+Ks 0.15 0.15 0.15
+Ns 30.0
+d 1.0
+illum 2

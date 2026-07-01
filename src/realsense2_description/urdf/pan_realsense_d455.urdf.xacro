@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="camera_pan_unit" params="
+      parent:=base_link
+      prefix:=camera
+      pan_xyz:='0.0218 0 0.545'
+      pan_rpy:='0 0 0'
+  ">
+
+    <!-- Fixed motor base -->
+    <link name="${prefix}_pan_base_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.08"/>
+        <inertia ixx="2e-4" ixy="0" ixz="0"
+                iyy="2e-4" iyz="0"
+                izz="2e-4"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="0.03" length="0.02"/>
+        </geometry>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="0.03" length="0.02"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}_pan_base_fixed_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${prefix}_pan_base_link"/>
+      <origin xyz="${pan_xyz}" rpy="${pan_rpy}"/>
+    </joint>
+
+    <!-- Rotating rotor -->
+    <link name="${prefix}_pan_rotor_link">
+
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.05"/>
+        <inertia ixx="1e-4" ixy="0" ixz="0"
+                iyy="1e-4" iyz="0"
+                izz="1e-4"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0.015" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="0.025" length="0.01"/>
+        </geometry>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0.015" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="0.025" length="0.01"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}_pan_joint" type="revolute">
+      <parent link="${prefix}_pan_base_link"/>
+      <child link="${prefix}_pan_rotor_link"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-3.14159" upper="3.14159" effort="2.0" velocity="2.0"/>
+      <dynamics damping="0.5" friction="0.2"/>
+    </joint>
+    <transmission name="${prefix}_pan_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${prefix}_pan_joint">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${prefix}_pan_motor">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <!-- A clean mount frame on rotor -->
+    <link name="${prefix}_mount_link"/>
+    <joint name="${prefix}_mount_fixed_joint" type="fixed">
+      <parent link="${prefix}_pan_rotor_link"/>
+      <child link="${prefix}_mount_link"/>
+      <origin xyz="0 0 0.03" rpy="0 0 0"/>
+    </joint>
+
+  </xacro:macro>
+</robot>

@@ -1,0 +1,4 @@
+front_cam_pan_joint_position_controller:
+  type: position_controllers/JointPositionController
+  joint: front_cam_pan_joint
+  pid: {p: 10.0, i: 0.0, d: 0.5}

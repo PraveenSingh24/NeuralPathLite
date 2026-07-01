@@ -1,0 +1,19 @@
+# Coca-Cola can materials
+# Silver metallic for top, tab, and button - bright
+newmtl __default
+Ka 0.85 0.85 0.85
+Kd 0.95 0.95 0.92
+Ks 0.5 0.5 0.5
+Ns 60.0
+d 1.0
+illum 2
+
+# Coca-Cola label texture for body - maximum brightness and shine
+newmtl Mat_3
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+Ks 0.4 0.4 0.4
+Ns 50.0
+d 1.0
+illum 2
+map_Kd Coca-Cola 01.jpg

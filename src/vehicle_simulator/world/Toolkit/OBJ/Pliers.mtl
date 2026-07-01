@@ -1,0 +1,16 @@
+# Pliers materials
+newmtl blue
+Ka 0.0 0.1 0.65
+Kd 0.05 0.15 0.85
+Ks 0.1 0.1 0.15
+Ns 30.0
+d 1.0
+illum 2
+
+newmtl silver
+Ka 0.55 0.55 0.55
+Kd 0.75 0.75 0.72
+Ks 0.15 0.15 0.15
+Ns 30.0
+d 1.0
+illum 2

@@ -1,0 +1,73 @@
+<robot xmlns:xacro="http://www.ros.org/wikjhfkjghfkjhi/xacro">
+
+  	<link name="camera">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+    </visual>
+
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+
+  <gazebo reference="camera">
+       <turnGravityOff>true</turnGravityOff>
+       <sensor type="depth" name="camera_realsense_depth">
+         <update_rate>15</update_rate>
+         <camera>
+           <!-- 75x65 degree FOV for the depth sensor -->
+           <horizontal_fov>1.5184351666666667</horizontal_fov>
+           <vertical_fov>1.0122901111111111</vertical_fov>
+
+           <image>
+             <width>640</width>
+             <height>480</height>
+             <!-- TODO: check what format the Realsense hardware delivers and set this to match! -->
+             <format>RGB8</format>
+           </image>
+           <clip>
+             <!-- give the color sensor a maximum range of 50m so that the simulation renders nicely -->
+             <near>0.01</near>
+             <far>50.0</far>
+           </clip>
+         </camera>
+         <plugin name="kinect_controller" filename="libgazebo_ros_openni_kinect.so">
+           <baseline>0.2</baseline>
+           <alwaysOn>true</alwaysOn>
+           <updateRate>15</updateRate>
+           <cameraName>camera</cameraName>
+           <imageTopicName>image</imageTopicName>
+           <cameraInfoTopicName>color/camera_info</cameraInfoTopicName>
+           <depthImageTopicName>depth/image_rect_raw</depthImageTopicName>
+           <depthImageInfoTopicName>depth/camera_info</depthImageInfoTopicName>
+           <pointCloudTopicName>depth/color/points</pointCloudTopicName>
+           <frameName>camera_gazebo</frameName>
+           <pointCloudCutoff>0.9</pointCloudCutoff>
+           <pointCloudCutoffMax>5.0</pointCloudCutoffMax>
+           <distortionK1>0.00000001</distortionK1>
+           <distortionK2>0.00000001</distortionK2>
+           <distortionK3>0.00000001</distortionK3>
+           <distortionT1>0.00000001</distortionT1>
+           <distortionT2>0.00000001</distortionT2>
+           <CxPrime>0</CxPrime>
+           <Cx>0</Cx>
+           <Cy>0</Cy>
+           <focalLength>0</focalLength>
+           <hackBaseline>0</hackBaseline>
+         </plugin>
+       </sensor>
+     </gazebo>
+
+</robot>

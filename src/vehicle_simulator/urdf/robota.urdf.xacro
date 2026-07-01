@@ -1,0 +1,187 @@
+<?xml version="1.0"?>
+<robot name="husky" xmlns:xacro="http://ros.org/wiki/xacro">
+    <!-- Bumper Extension -->
+    <xacro:property name="husky_front_bumper_extend"  value="$(optenv HUSKY_FRONT_BUMPER_EXTEND 0)" />
+    <xacro:property name="husky_rear_bumper_extend"   value="$(optenv HUSKY_REAR_BUMPER_EXTEND 0)" />
+
+    <!-- Height of the sensor arch in mm.  Must be either 510 or 300 -->
+    <xacro:arg name="sensor_arch"         default="$(optenv HUSKY_SENSOR_ARCH 0)" />
+    <xacro:arg name="sensor_arch_height"  default="$(optenv HUSKY_SENSOR_ARCH_HEIGHT 510)" />
+    <xacro:arg name="sensor_arch_xyz"     default="$(optenv HUSKY_SENSOR_ARCH_OFFSET 0 0 0)"/>
+    <xacro:arg name="sensor_arch_rpy"     default="$(optenv HUSKY_SENSOR_ARCH_RPY 0 0 0)"/>
+
+    <!-- Extras -->
+    <xacro:arg name="robot_namespace" default="$(optenv ROBOT_NAMESPACE /)" />
+    <xacro:arg name="urdf_extras"     default="$(optenv HUSKY_URDF_EXTRAS empty.urdf)" />
+    <xacro:arg name="cpr_urdf_extras" default="$(optenv CPR_URDF_EXTRAS empty.urdf)" />
+
+    <!-- Included URDF/XACRO Files -->
+    <xacro:include filename="$(find husky_description)/urdf/decorations.urdf.xacro" />
+    <xacro:include filename="$(find husky_description)/urdf/wheel.urdf.xacro" />
+
+    <xacro:property name="M_PI" value="3.14159"/>
+
+    <!-- Base Size -->
+    <xacro:property name="base_x_size" value="0.98740000" />
+    <xacro:property name="base_y_size" value="0.57090000" />
+    <xacro:property name="base_z_size" value="0.24750000" />
+
+    <!-- Wheel Mounting Positions -->
+    <xacro:property name="wheelbase" value="0.5120" />
+    <xacro:property name="track" value="0.5708" />
+    <xacro:property name="wheel_vertical_offset" value="0.03282" />
+
+    <!-- Wheel Properties -->
+    <xacro:property name="wheel_length" value="0.1143" />
+    <xacro:property name="wheel_radius" value="0.1651" />
+
+    <!-- Base link is the center of the robot's bottom plate -->
+    <link name="base_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://husky_description/meshes/base_link.dae" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="${( husky_front_bumper_extend - husky_rear_bumper_extend ) / 2.0} 0 ${base_z_size/4}" rpy="0 0 0" />
+        <geometry>
+          <box size="${ base_x_size + husky_front_bumper_extend + husky_rear_bumper_extend } ${base_y_size} ${base_z_size/2}"/>
+        </geometry>
+      </collision>
+      <collision>
+        <origin xyz="0 0 ${base_z_size*3/4-0.01}" rpy="0 0 0" />
+        <geometry>
+          <box size="${base_x_size*4/5} ${base_y_size} ${base_z_size/2-0.02}"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- Base footprint is on the ground under the robot -->
+    <link name="base_footprint"/>
+
+    <joint name="base_footprint_joint" type="fixed">
+      <origin xyz="0 0 ${wheel_vertical_offset - wheel_radius}" rpy="0 0 0" />
+      <parent link="base_link" />
+      <child link="base_footprint" />
+    </joint>
+
+    <!-- Inertial link stores the robot's inertial information -->
+    <link name="inertial_link">
+      <inertial>
+        <mass value="46.034" />
+        <origin xyz="-0.00065 -0.085 0.062" />
+        <inertia ixx="0.6022" ixy="-0.02364" ixz="-0.1197" iyy="1.7386" iyz="-0.001544" izz="2.0296" />
+      </inertial>
+    </link>
+
+    <joint name="inertial_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="base_link" />
+      <child link="inertial_link" />
+    </joint>
+     <!-- Camera mounting-->
+  
+  <link name="left_arm_link">
+    <visual>
+      <origin xyz="0 0 0.15"/>
+      <geometry>
+        <box size="0.02 0.02 0.3"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.15"/>
+      <geometry>
+        <box size="0.02 0.02 0.3"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="right_arm_link">
+    <visual>
+      <origin xyz="0 0 0.15"/>
+      <geometry>
+        <box size="0.02 0.02 0.3"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.15"/>
+      <geometry>
+        <box size="0.02 0.02 0.3"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="top_link">
+    <visual>
+      <origin xyz="0 0.2 0"/>
+      <geometry>
+        <box size="0.02 0.4 0.02"/>
+      </geometry>
+    </visual>
+     <origin xyz="0 0.2 0"/>
+    <collision>
+      <geometry>
+        <box size="0.02 0.5 0.02"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="base_to_left" type="fixed">
+    <parent link="base_link"/>
+    <child link="left_arm_link"/>
+    <origin xyz="0 -0.2 0.2475" rpy="0 0 0"/>
+  </joint>
+  
+  <joint name="base_to_right" type="fixed">
+    <parent link="base_link"/>
+    <child link="right_arm_link"/>
+    <origin xyz="0 0.2 0.2475" rpy="0 0 0"/>
+  </joint>
+
+   <joint name="base_to_top" type="fixed">
+    <parent link="base_link"/>
+    <child link="top_link"/>
+    <origin xyz="0 -0.2 0.5475" rpy="0 0 0"/>
+  </joint>
+    <!-- Husky wheel macros -->
+    <xacro:husky_wheel wheel_prefix="front_left">
+      <origin xyz="${wheelbase/2} ${track/2} ${wheel_vertical_offset}" rpy="0 0 0" />
+    </xacro:husky_wheel>
+    <xacro:husky_wheel wheel_prefix="front_right">
+      <origin xyz="${wheelbase/2} ${-track/2} ${wheel_vertical_offset}" rpy="0 0 0" />
+    </xacro:husky_wheel>
+    <xacro:husky_wheel wheel_prefix="rear_left">
+      <origin xyz="${-wheelbase/2} ${track/2} ${wheel_vertical_offset}" rpy="0 0 0" />
+    </xacro:husky_wheel>
+    <xacro:husky_wheel wheel_prefix="rear_right">
+      <origin xyz="${-wheelbase/2} ${-track/2} ${wheel_vertical_offset}" rpy="0 0 0" />
+    </xacro:husky_wheel>
+
+    <!-- Husky Decorations -->
+    <xacro:husky_decorate />
+
+    <!--
+      Add the main sensor arch if the user has specifically enabled it, or if a sensor
+      requires it for mounting
+    -->
+    <xacro:if value="$(arg sensor_arch)">
+      <xacro:sensor_arch prefix="" parent="top_plate_link" size="$(arg sensor_arch_height)">
+        <origin xyz="$(arg sensor_arch_xyz)" rpy="$(arg sensor_arch_rpy)"/>
+      </xacro:sensor_arch>
+    </xacro:if>
+  
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>$(arg robot_namespace)</robotNamespace>
+      <legacyModeNS>true</legacyModeNS>
+    </plugin>
+    <!--gravity>9.8</gravity-->
+  </gazebo>
+
+  <!-- Optional custom includes. -->
+  <xacro:include filename="$(arg urdf_extras)" />
+
+  <!-- Optional for Clearpath internal softwares -->
+  <xacro:include filename="$(arg cpr_urdf_extras)" /> 
+</robot>

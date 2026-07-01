@@ -1,0 +1,33 @@
+<?xml version='1.0' ?>
+<sdf version='1.6'>
+  <model name='samsung_j8_black'>
+    <static>true</static>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Artifact Proximity Detector</uri>
+    </include>
+
+    <link name='link'>
+      <pose>0 0 0.08 0 0 0</pose>
+      <collision name='collision'>
+        <geometry>
+          <mesh>
+            <uri>meshes/phone.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='visual'>
+        <geometry>
+          <mesh>
+            <uri>meshes/phone.dae</uri>
+          </mesh>
+        </geometry>
+        <plugin
+          filename="ignition-gazebo-thermal-system"
+          name="ignition::gazebo::systems::Thermal">
+          <heat_signature>materials/textures/J8_Thermal.png</heat_signature>
+          <max_temp>298.75</max_temp>
+        </plugin>
+      </visual>
+    </link>
+  </model>
+</sdf>

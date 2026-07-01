@@ -1,0 +1,70 @@
+<launch>
+  <arg name="enable_ekf" default="false" />
+  <!-- Launch Gazebo with the specified world file -->
+  <arg name="world_name" default="$(find vehicle_simulator)/world/krishna_world.world"/>
+  <arg name="config_extras" default="$(find husky_control)/config/empty.yaml" />
+  
+  <!-- Start Gazebo server -->
+  <node name="gazebo" pkg="gazebo_ros" type="gzserver" args="$(arg world_name)" output="screen"/>
+  
+  <!-- Start Gazebo client -->
+  <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" output="screen"/>
+  
+  <!-- Ensure robot_description parameter is set -->
+  <param name="robot_description" command="$(find xacro)/xacro $(find husky_description)/urdf/husky.urdf.xacro" />
+  
+  <!--node pkg="gazebo_ros" type="spawn_model" name="spawn_camera" args="-urdf -param /robot_description -model realsense"/-->
+  <!--include file="$(find husky_description)/launch/description.launch" /-->
+
+  <!-- Load controller configuration -->
+  <rosparam command="load" file="$(find husky_control)/config/control.yaml" />
+
+  <!-- Spawn controllers -->
+  <node name="base_controller_spawner" pkg="controller_manager" type="spawner"
+        args="husky_joint_publisher husky_velocity_controller"/>
+  <rosparam param="wheel_radius_multiplier" ns="husky_velocity_controller" subst_value="True">
+        $(optenv HUSKY_WHEEL_MULTIPLIER 1.0)
+  </rosparam>
+
+  <!-- Spawn Husky model in the world -->
+  <node name="spawn_husky_model" pkg="gazebo_ros" type="spawn_model" 
+        args="-param robot_description -urdf -model husky" 
+        respawn="false" output="screen"/>
+   <!-- Spawn camera model in the world -->
+  
+  <group if="$(arg enable_ekf)">
+    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization">
+      <rosparam command="load" file="$(find husky_control)/config/localization.yaml" />
+    </node>
+  </group>
+
+  <node pkg="interactive_marker_twist_server" type="marker_server" name="twist_marker_server" output="screen">
+    <param name="link_name" value="base_link" />
+  </node>
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+ <!-- Load parameters -->
+  <!--param name="camera_description" command="$(find xacro)/xacro '$(find realsense2_description)/urdf/_d435.urdf.xacro'" /-->
+
+  <!-- Nodelet manager -->
+  <!--node pkg="nodelet" type="nodelet" name="camera_nodelet_manager" args="manager" /-->
+
+  <!-- RealSense Camera Nodelet -->
+  <!--node pkg="nodelet" type="nodelet" name="realsense_camera" args="load realsense2_camera/RealSenseNodeFactory camera_nodelet_manager" /-->
+
+  <!-- Launch file for RealSense camera with model -->
+  <node pkg="twist_mux" type="twist_mux" name="twist_mux">
+    <rosparam command="load" file="$(find husky_control)/config/twist_mux.yaml" />
+    <remap from="cmd_vel_out" to="husky_velocity_controller/cmd_vel"/>
+  </node>
+
+  <!-- Override the default control parameters, see config/empty.yaml for default. -->
+  <rosparam command="load" file="$(arg config_extras)" subst_value="true" />
+
+</launch>
+
+
+
+
+
+
